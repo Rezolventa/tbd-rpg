@@ -26,13 +26,15 @@ class SpriteFactory:
 
 
 class UIFactory(SpriteFactory):
-    def run(self, group, focus_group):
-        map_frame = CommonSprite(group, pygame.image.load('sprites/map_frame.jpg'), 32, 32)
-        info_frame = CommonSprite(group, pygame.image.load('sprites/info_frame.jpg'), 576, 32)
-        action_frame = CommonSprite(group, pygame.image.load('sprites/action_frame.jpg'), 576, 448)
-        player = PlayerFactory(32, 32).run(group)
+    def run(self, map_group, player_group, focus_group):
+        map_frame = CommonSprite(map_group, pygame.image.load('sprites/map_frame.jpg'), 32, 32)
+        info_frame = CommonSprite(map_group, pygame.image.load('sprites/info_frame.jpg'), 576, 32)
+        action_frame = CommonSprite(map_group, pygame.image.load('sprites/action_frame.jpg'), 576, 448)
+        player = PlayerFactory(32, 32).run(player_group)
         # TODO: не место здесь
         focus_image = CommonSprite(focus_group, self.get_scaled_image('sprites/tile_focus.png', 2), 16, 16)
+        focus_group.remove(focus_image)
+
         result = {
             'map_frame': map_frame,
             'player': player,
@@ -92,12 +94,15 @@ class GameController:
 class ScreenManager:
     def __init__(self):
         self.window = pygame.display.set_mode((31 * TILE_SIDE_PX, 18 * TILE_SIDE_PX))
-        self.sprite_group = pygame.sprite.Group()
+
+        self.ui_group = pygame.sprite.Group()
+        self.map_group = pygame.sprite.Group()
         self.focus_group = pygame.sprite.GroupSingle()
+        self.player_group = pygame.sprite.GroupSingle()
 
         pygame.display.set_caption('Client')
 
-        ui = UIFactory().run(self.sprite_group, self.focus_group)
+        ui = UIFactory().run(self.map_group, self.player_group, self.focus_group)
 
         map_frame = ui['map_frame']
 
@@ -120,7 +125,7 @@ class ScreenManager:
             'XXXXXXXXXXXXXXXX',
         ]
 
-        self.tiles = MapTilesFactory(self.map_scheme, map_frame, self.sprite_group).run()
+        self.tiles = MapTilesFactory(self.map_scheme, map_frame, self.map_group).run()
         self.focus_image = ui['focus_image']
 
     def get_tiles_as_list(self):
@@ -130,9 +135,17 @@ class ScreenManager:
         return tiles
 
     def redraw(self):
-        self.sprite_group.update()
-        self.sprite_group.draw(self.window)
+        """
+        Определяет порядок отображения слоёв (групп) на экране
+        """
+        self.ui_group.update()
+        self.ui_group.draw(self.window)
+        self.map_group.update()
+        self.map_group.draw(self.window)
+        self.focus_group.update()
         self.focus_group.draw(self.window)
+        self.player_group.update()
+        self.player_group.draw(self.window)
 
 
 class CommonSprite(pygame.sprite.Sprite):
