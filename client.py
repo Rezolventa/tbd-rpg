@@ -1,5 +1,4 @@
 import pygame
-
 from sprites import GameController
 
 pygame.init()
@@ -31,8 +30,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-"""
-Цвет текста - от важности
-вместо ников - иконки
-"""

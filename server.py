@@ -2,6 +2,9 @@ import socket
 from _thread import start_new_thread
 from datetime import datetime
 
+from orm.config import *
+from orm.models import Player
+
 from const import SERVER_ADDRESS
 
 
@@ -21,6 +24,12 @@ class Server:
     def get_time_count(self):
         return str(int((datetime.now() - self.server_started_at).total_seconds()))
 
+    # --- db test ---
+    def test_add_stamina(self):
+        player = Player.objects.last()
+        player.stamina += 1
+        player.save()
+
     def handle_client(self, connection, player):
         connection.send(str.encode(self.get_time_count()))
 
@@ -38,6 +47,7 @@ class Server:
                 print('Server time:', time_count)
 
                 connection.sendall(str.encode(time_count))
+                self.test_add_stamina()
             except Exception as e:
                 print('Error in handling client', e)
                 break
@@ -46,6 +56,12 @@ class Server:
 def main():
     session_id = 0
     server = Server()
+
+    # --- db test ---
+    Player.objects.create(
+        name='Rez',
+        stamina=100,
+    )
 
     while True:
         connection, ip = server.socket.accept()
