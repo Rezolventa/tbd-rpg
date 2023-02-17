@@ -26,13 +26,15 @@ class SpriteFactory:
 
 
 class UIFactory(SpriteFactory):
-    def run(self, map_group, player_group, focus_group):
+    def run(self, map_group, player_group, hover_group, focus_group):
         map_frame = CommonSprite(map_group, pygame.image.load('sprites/map_frame.jpg'), 32, 32)
         info_frame = CommonSprite(map_group, pygame.image.load('sprites/info_frame.jpg'), 576, 32)
         action_frame = CommonSprite(map_group, pygame.image.load('sprites/action_frame.jpg'), 576, 448)
         player = PlayerFactory(32, 32).run(player_group)
         # TODO: не место здесь
-        focus_image = CommonSprite(focus_group, self.get_scaled_image('sprites/tile_focus.png', 2), 16, 16)
+        hover_image = CommonSprite(hover_group, self.get_scaled_image('sprites/tile_focus.png', 2), 16, 16, 'hover_image')
+        hover_group.remove(hover_image)
+        focus_image = CommonSprite(focus_group, self.get_scaled_image('sprites/tile_focus.png', 2), 16, 16, 'focus_image')
         focus_group.remove(focus_image)
 
         result = {
@@ -40,6 +42,7 @@ class UIFactory(SpriteFactory):
             'player': player,
             'info_frame': info_frame,
             'action_frame': action_frame,
+            'hover_image': hover_image,
             'focus_image': focus_image,
         }
         return result
@@ -84,7 +87,7 @@ class MapTilesFactory(SpriteFactory):
 
 class GameController:
     def __init__(self):
-        self.screen_man = ScreenManager()
+        # self.screen_man = ScreenManager()
         self.net_man = NetworkManager()
         self.screen_man = ScreenManager()
         self.player = Player()
@@ -97,12 +100,13 @@ class ScreenManager:
 
         self.ui_group = pygame.sprite.Group()
         self.map_group = pygame.sprite.Group()
+        self.hover_group = pygame.sprite.GroupSingle()
         self.focus_group = pygame.sprite.GroupSingle()
         self.player_group = pygame.sprite.GroupSingle()
 
         pygame.display.set_caption('Client')
 
-        ui = UIFactory().run(self.map_group, self.player_group, self.focus_group)
+        ui = UIFactory().run(self.map_group, self.player_group, self.hover_group, self.focus_group)
 
         map_frame = ui['map_frame']
 
@@ -126,6 +130,7 @@ class ScreenManager:
         ]
 
         self.tiles = MapTilesFactory(self.map_scheme, map_frame, self.map_group).run()
+        self.hover_image = ui['hover_image']
         self.focus_image = ui['focus_image']
 
     def get_tiles_as_list(self):
@@ -142,6 +147,8 @@ class ScreenManager:
         self.ui_group.draw(self.window)
         self.map_group.update()
         self.map_group.draw(self.window)
+        self.hover_group.update()
+        self.hover_group.draw(self.window)
         self.focus_group.update()
         self.focus_group.draw(self.window)
         self.player_group.update()
@@ -149,14 +156,15 @@ class ScreenManager:
 
 
 class CommonSprite(pygame.sprite.Sprite):
-    def __init__(self, group, image, x, y):
+    def __init__(self, group, image, x, y, name=None):
         super().__init__(group)
         self.x = x
         self.y = y
         self.image = image
         self.rect = self.image.get_rect()
         self.rect.topleft = (self.x, self.y)
-        self.focus_on = False
+        self.name = name
+        # self.focus_on = False
 
 
 # class Textbox(pygame.sprite.Sprite):

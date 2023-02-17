@@ -21,18 +21,24 @@ class Player:
 class ActionManager:
     def __init__(self, game_controller):
         self.game_controller = game_controller
-        # TODO: не место здесь
+        self.hover_image = game_controller.screen_man.hover_image
         self.focus_image = game_controller.screen_man.focus_image
+        self.tiles = self.game_controller.screen_man.get_tiles_as_list()
 
     def handle(self):
         self.handle_mouse_hover()
+        # self.handle_mouse_click()
 
     def handle_mouse_hover(self):
+        self.game_controller.screen_man.hover_group.remove(self.game_controller.screen_man.hover_image)
+        for tile in self.tiles:
+            if tile.rect.collidepoint(pygame.mouse.get_pos()):
+                self.hover_image.rect = tile.rect
+                self.game_controller.screen_man.hover_group.add(self.hover_image)
+
+    def handle_mouse_click(self):
         self.game_controller.screen_man.focus_group.remove(self.game_controller.screen_man.focus_image)
-        for tile in self.game_controller.screen_man.get_tiles_as_list():
+        for tile in self.tiles:
             if tile.rect.collidepoint(pygame.mouse.get_pos()):
                 self.focus_image.rect = tile.rect
                 self.game_controller.screen_man.focus_group.add(self.focus_image)
-
-    def handle_mouse_click(self):
-        pass

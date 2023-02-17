@@ -21,6 +21,7 @@ def main():
                 break
             elif event.type == pygame.MOUSEBUTTONUP:
                 game.net_man.send(str.encode(game.player.get_time_count))
+                game.action_man.handle_mouse_click()
 
         if running:
             game.action_man.handle()
