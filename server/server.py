@@ -47,11 +47,12 @@ class Server:
                         tile_info.hidden_loot_spots,
                     )
 
+                    # TODO: send json
+                    connection.send(str.encode(str(tile_info.loot_spots)))
+
                 time_count = self.get_time_count()
                 print('Server time:', time_count)
-
-                # TODO: send json
-                connection.send(str.encode(str(tile_info.loot_spots)))
+                connection.send(str.encode(time_count))
             except Exception as e:
                 print('Error in handling client', e)
                 break
