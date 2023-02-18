@@ -2,10 +2,9 @@ import socket
 from _thread import start_new_thread
 from datetime import datetime
 
-from orm.config import *  # django.core.exceptions.ImproperlyConfigured
-from orm.models import Player
-
 from const import SERVER_ADDRESS
+from orm.config import *  # django.core.exceptions.ImproperlyConfigured
+from orm.models import Player, TileInfo
 
 
 class Server:
@@ -24,12 +23,6 @@ class Server:
     def get_time_count(self):
         return str(int((datetime.now() - self.server_started_at).total_seconds()))
 
-    # --- db test ---
-    def test_add_stamina(self):
-        player = Player.objects.last()
-        player.stamina += 1
-        player.save()
-
     def handle_client(self, connection, player):
         connection.send(str.encode(self.get_time_count()))
 
@@ -41,13 +34,24 @@ class Server:
                     print('Client disconnected')
                     break
 
-                print('Client time:', data)
+                print('Incoming message:', data)
+
+                # -- tile info test --
+                if data == 'GET_TILE_INFO':
+                    tile_info = TileInfo.objects.first()
+                    print(
+                        'TILE INFO',
+                        'loot spots:',
+                        tile_info.loot_spots,
+                        'hidden loot spots',
+                        tile_info.hidden_loot_spots,
+                    )
 
                 time_count = self.get_time_count()
                 print('Server time:', time_count)
 
-                connection.sendall(str.encode(time_count))
-                self.test_add_stamina()
+                # TODO: send json
+                connection.send(str.encode(str(tile_info.loot_spots)))
             except Exception as e:
                 print('Error in handling client', e)
                 break
@@ -57,11 +61,7 @@ def main():
     session_id = 0
     server = Server()
 
-    # --- db test ---
-    Player.objects.create(
-        name='Rez',
-        stamina=100,
-    )
+    Player.objects.get_or_create(name='Rez', defaults={'stamina': 100})
 
     while True:
         connection, ip = server.socket.accept()

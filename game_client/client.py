@@ -1,5 +1,6 @@
 import pygame
-from sprites import GameController
+
+from game_client.controllers import GameController
 
 pygame.init()
 pygame.font.init()
@@ -22,6 +23,7 @@ def main():
             elif event.type == pygame.MOUSEBUTTONUP:
                 game.net_man.send(str.encode(game.player.get_time_count))
                 game.action_man.handle_mouse_click()
+                game.net_man.send(str.encode('GET_TILE_INFO'))
 
         if running:
             game.action_man.handle_routine()

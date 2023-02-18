@@ -1,8 +1,6 @@
 import pygame
 
 from const import TILE_SIDE_PX
-from network import NetworkManager
-from player import Player, ActionManager
 
 WHITE = (255, 255, 255)
 
@@ -36,9 +34,13 @@ class UIFactory(SpriteFactory):
         player = PlayerFactory(32, 32).run(player_group)
 
         # Элементы UI
-        hover_image = CommonSprite(hover_group, self.get_scaled_image('sprites/tile_focus.png', 2), 16, 16, 'hover_image')
+        hover_image = CommonSprite(
+            hover_group, self.get_scaled_image('sprites/tile_focus.png', 2), 16, 16, 'hover_image'
+        )
         hover_group.remove(hover_image)
-        focus_image = CommonSprite(focus_group, self.get_scaled_image('sprites/tile_focus.png', 2), 16, 16, 'focus_image')
+        focus_image = CommonSprite(
+            focus_group, self.get_scaled_image('sprites/tile_focus.png', 2), 16, 16, 'focus_image'
+        )
         focus_group.remove(focus_image)
 
         result = {
@@ -54,6 +56,7 @@ class UIFactory(SpriteFactory):
 
 class PlayerFactory(SpriteFactory):
     """Отвечает за иниицализацию спрайтов игрока."""
+
     def __init__(self, x, y):
         self.x = x
         self.y = y
@@ -64,6 +67,7 @@ class PlayerFactory(SpriteFactory):
 
 class MapTilesFactory(SpriteFactory):
     """Отвечает за иниицализацию спрайтов основной карты."""
+
     def __init__(self, map_scheme, map_frame, group):
         self.map_scheme = map_scheme
         self.map_frame = map_frame
@@ -91,18 +95,9 @@ class MapTilesFactory(SpriteFactory):
         return tiles
 
 
-# TODO: move from sprites
-class GameController:
-    """Контроллер, управляющий основными процессами игры."""
-    def __init__(self):
-        self.net_man = NetworkManager()
-        self.screen_man = ScreenManager()
-        self.player = Player()
-        self.action_man = ActionManager(self)
-
-
 class ScreenManager:
     """Менеджер объектов на экране клиента."""
+
     def __init__(self):
         self.window = pygame.display.set_mode((31 * TILE_SIDE_PX, 18 * TILE_SIDE_PX))
 
@@ -163,6 +158,7 @@ class ScreenManager:
 
 class CommonSprite(pygame.sprite.Sprite):
     """Модифицированный Sprite, класс-прототип для всех спрайтов."""
+
     def __init__(self, group, image, x, y, name=None):
         super().__init__(group)
         self.x = x

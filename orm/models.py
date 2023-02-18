@@ -7,3 +7,11 @@ class Player(models.Model):
 
     class Meta:
         db_table = 'player'
+
+
+class TileInfo(models.Model):
+    loot_spots = models.IntegerField()
+    hidden_loot_spots = models.IntegerField()
+
+    class Meta:
+        db_table = 'tile_info'
