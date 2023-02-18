@@ -24,7 +24,7 @@ def main():
                 game.action_man.handle_mouse_click()
 
         if running:
-            game.action_man.handle()
+            game.action_man.handle_routine()
             game.screen_man.redraw()
             pygame.display.flip()
 

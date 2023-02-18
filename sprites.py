@@ -26,12 +26,16 @@ class SpriteFactory:
 
 
 class UIFactory(SpriteFactory):
+    """Отвечает за иниицализацию спрайтов UI."""
+
     def run(self, map_group, player_group, hover_group, focus_group):
+        # Фреймы - окна интерфейса
         map_frame = CommonSprite(map_group, pygame.image.load('sprites/map_frame.jpg'), 32, 32)
         info_frame = CommonSprite(map_group, pygame.image.load('sprites/info_frame.jpg'), 576, 32)
         action_frame = CommonSprite(map_group, pygame.image.load('sprites/action_frame.jpg'), 576, 448)
         player = PlayerFactory(32, 32).run(player_group)
-        # TODO: не место здесь
+
+        # Элементы UI
         hover_image = CommonSprite(hover_group, self.get_scaled_image('sprites/tile_focus.png', 2), 16, 16, 'hover_image')
         hover_group.remove(hover_image)
         focus_image = CommonSprite(focus_group, self.get_scaled_image('sprites/tile_focus.png', 2), 16, 16, 'focus_image')
@@ -49,6 +53,7 @@ class UIFactory(SpriteFactory):
 
 
 class PlayerFactory(SpriteFactory):
+    """Отвечает за иниицализацию спрайтов игрока."""
     def __init__(self, x, y):
         self.x = x
         self.y = y
@@ -58,6 +63,7 @@ class PlayerFactory(SpriteFactory):
 
 
 class MapTilesFactory(SpriteFactory):
+    """Отвечает за иниицализацию спрайтов основной карты."""
     def __init__(self, map_scheme, map_frame, group):
         self.map_scheme = map_scheme
         self.map_frame = map_frame
@@ -85,9 +91,10 @@ class MapTilesFactory(SpriteFactory):
         return tiles
 
 
+# TODO: move from sprites
 class GameController:
+    """Контроллер, управляющий основными процессами игры."""
     def __init__(self):
-        # self.screen_man = ScreenManager()
         self.net_man = NetworkManager()
         self.screen_man = ScreenManager()
         self.player = Player()
@@ -95,6 +102,7 @@ class GameController:
 
 
 class ScreenManager:
+    """Менеджер объектов на экране клиента."""
     def __init__(self):
         self.window = pygame.display.set_mode((31 * TILE_SIDE_PX, 18 * TILE_SIDE_PX))
 
@@ -140,9 +148,7 @@ class ScreenManager:
         return tiles
 
     def redraw(self):
-        """
-        Определяет порядок отображения слоёв (групп) на экране
-        """
+        """Определяет порядок отображения слоёв (групп) на экране."""
         self.ui_group.update()
         self.ui_group.draw(self.window)
         self.map_group.update()
@@ -156,6 +162,7 @@ class ScreenManager:
 
 
 class CommonSprite(pygame.sprite.Sprite):
+    """Модифицированный Sprite, класс-прототип для всех спрайтов."""
     def __init__(self, group, image, x, y, name=None):
         super().__init__(group)
         self.x = x

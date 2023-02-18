@@ -25,9 +25,8 @@ class ActionManager:
         self.focus_image = game_controller.screen_man.focus_image
         self.tiles = self.game_controller.screen_man.get_tiles_as_list()
 
-    def handle(self):
+    def handle_routine(self):
         self.handle_mouse_hover()
-        # self.handle_mouse_click()
 
     def handle_mouse_hover(self):
         self.game_controller.screen_man.hover_group.remove(self.game_controller.screen_man.hover_image)
