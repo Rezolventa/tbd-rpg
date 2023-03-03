@@ -9,9 +9,25 @@ class Player(models.Model):
         db_table = 'player'
 
 
-class TileInfo(models.Model):
+class TileTemplate(models.Model):
+    class TileTypes(models.TextChoices):
+        SWAMP = 'swamp', 'Болото'
+        FOREST = 'forest', 'Лес'
+        MOUNTAINS = 'mountains', 'Горы'
+
+    type = models.CharField(choices=TileTypes.choices, null=True, max_length=32)
+    tier = models.SmallIntegerField()
     loot_spots = models.IntegerField()
     hidden_loot_spots = models.IntegerField()
 
     class Meta:
-        db_table = 'tile_info'
+        db_table = 'tile_template'
+
+
+class TileGeo(models.Model):
+    x = models.SmallIntegerField()
+    y = models.SmallIntegerField()
+    template = models.ForeignKey(TileTemplate, on_delete=models.DO_NOTHING)
+
+    class Meta:
+        db_table = 'tile_geo'

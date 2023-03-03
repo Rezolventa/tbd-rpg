@@ -1,3 +1,5 @@
+import json
+
 import pygame
 
 from game_client.controllers import GameController
@@ -22,11 +24,17 @@ def main():
                 break
             elif event.type == pygame.MOUSEBUTTONUP:
                 # - LEFT CLICK
-                game.action_man.handle_mouse_click()
+                tile_rect = game.action_man.handle_mouse_click()
 
-                # -- TILE_INFO
-                x = game.net_man.send(str.encode('GET_TILE_INFO'))
-                print(x)
+                result = {
+                    'action': 'GET_TILE_INFO',
+                    'data': {
+                        'x': tile_rect.x,
+                        'y': tile_rect.y,
+                    }
+                }
+                response = game.net_man.send(bytes(json.dumps(result), encoding='utf-8'))
+                print(response)
 
         if running:
             game.action_man.handle_routine()

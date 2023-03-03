@@ -41,3 +41,4 @@ class ActionManager:
             if tile.rect.collidepoint(pygame.mouse.get_pos()):
                 self.focus_image.rect = tile.rect
                 self.game_controller.screen_man.focus_group.add(self.focus_image)
+                return tile.rect

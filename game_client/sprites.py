@@ -28,18 +28,18 @@ class UIFactory(SpriteFactory):
 
     def run(self, map_group, player_group, hover_group, focus_group):
         # Фреймы - окна интерфейса
-        map_frame = CommonSprite(map_group, pygame.image.load('sprites/map_frame.jpg'), 32, 32)
-        info_frame = CommonSprite(map_group, pygame.image.load('sprites/info_frame.jpg'), 576, 32)
-        action_frame = CommonSprite(map_group, pygame.image.load('sprites/action_frame.jpg'), 576, 448)
+        map_frame = CommonSprite(map_group, pygame.image.load('img/map_frame.jpg'), 32, 32)
+        info_frame = CommonSprite(map_group, pygame.image.load('img/info_frame.jpg'), 576, 32)
+        action_frame = CommonSprite(map_group, pygame.image.load('img/action_frame.jpg'), 576, 448)
         player = PlayerFactory(32, 32).run(player_group)
 
         # Элементы UI
         hover_image = CommonSprite(
-            hover_group, self.get_scaled_image('sprites/tile_focus.png', 2), 16, 16, 'hover_image'
+            hover_group, self.get_scaled_image('img/tile_focus.png', 2), 16, 16, 'hover_image'
         )
         hover_group.remove(hover_image)
         focus_image = CommonSprite(
-            focus_group, self.get_scaled_image('sprites/tile_focus.png', 2), 16, 16, 'focus_image'
+            focus_group, self.get_scaled_image('img/tile_focus.png', 2), 16, 16, 'focus_image'
         )
         focus_group.remove(focus_image)
 
@@ -62,7 +62,7 @@ class PlayerFactory(SpriteFactory):
         self.y = y
 
     def run(self, group):
-        return CommonSprite(group, self.get_scaled_image('sprites/player.png', 2), self.x, self.y)
+        return CommonSprite(group, self.get_scaled_image('img/player.png', 2), self.x, self.y)
 
 
 class MapTilesFactory(SpriteFactory):
@@ -88,7 +88,7 @@ class MapTilesFactory(SpriteFactory):
                     continue
                 x = self.map_frame.x + j * 32
                 y = self.map_frame.x + i * 32
-                image = self.get_scaled_image('sprites/{}.jpg'.format(self.tile_mapping[tile_symbol]), 2)
+                image = self.get_scaled_image('img/{}.jpg'.format(self.tile_mapping[tile_symbol]), 2)
                 sprite = self.create(image, x, y)
                 row.append(sprite)
             tiles.append(row)
@@ -113,6 +113,7 @@ class ScreenManager:
 
         map_frame = ui['map_frame']
 
+        # TODO: should be received from server
         self.map_scheme = [
             'MSFXXXXXXXXXXXXX',
             'SSFXXXXXXXXXXXXX',
