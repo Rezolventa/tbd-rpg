@@ -26,7 +26,7 @@ class SpriteFactory:
 class UIFactory(SpriteFactory):
     """Отвечает за иниицализацию спрайтов UI."""
 
-    def run(self, map_group, player_group, hover_group, focus_group):
+    def run(self, map_group, player_group, hover_group, focus_group, icons_group):
         # Фреймы - окна интерфейса
         map_frame = CommonSprite(map_group, pygame.image.load('img/map_frame.jpg'), 32, 32)
         info_frame = CommonSprite(map_group, pygame.image.load('img/info_frame.jpg'), 576, 32)
@@ -43,6 +43,8 @@ class UIFactory(SpriteFactory):
         )
         focus_group.remove(focus_image)
 
+        icon_move_image = CommonSprite(hover_group, self.get_scaled_image('img/icon_move.jpg', 2), 576, 448)
+
         result = {
             'map_frame': map_frame,
             'player': player,
@@ -50,6 +52,7 @@ class UIFactory(SpriteFactory):
             'action_frame': action_frame,
             'hover_image': hover_image,
             'focus_image': focus_image,
+            'icon_move_image': icon_move_image,
         }
         return result
 
@@ -86,8 +89,8 @@ class MapTilesFactory(SpriteFactory):
                 tile_symbol = self.map_scheme[i][j]
                 if tile_symbol == 'X':
                     continue
-                x = self.map_frame.x + j * 32
-                y = self.map_frame.x + i * 32
+                x = self.map_frame.x + j * TILE_SIDE_PX
+                y = self.map_frame.x + i * TILE_SIDE_PX
                 image = self.get_scaled_image('img/{}.jpg'.format(self.tile_mapping[tile_symbol]), 2)
                 sprite = self.create(image, x, y)
                 row.append(sprite)
@@ -106,10 +109,11 @@ class ScreenManager:
         self.hover_group = pygame.sprite.GroupSingle()
         self.focus_group = pygame.sprite.GroupSingle()
         self.player_group = pygame.sprite.GroupSingle()
+        self.icons_group = pygame.sprite.GroupSingle()
 
         pygame.display.set_caption('Client')
 
-        ui = UIFactory().run(self.map_group, self.player_group, self.hover_group, self.focus_group)
+        ui = UIFactory().run(self.map_group, self.player_group, self.hover_group, self.focus_group, self.icons_group)
 
         map_frame = ui['map_frame']
 
@@ -155,6 +159,8 @@ class ScreenManager:
         self.focus_group.draw(self.window)
         self.player_group.update()
         self.player_group.draw(self.window)
+        self.icons_group.update()
+        self.icons_group.draw(self.window)
 
 
 class CommonSprite(pygame.sprite.Sprite):

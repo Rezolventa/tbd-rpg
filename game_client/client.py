@@ -26,15 +26,16 @@ def main():
                 # - LEFT CLICK
                 tile_rect = game.action_man.handle_mouse_click()
 
-                result = {
-                    'action': 'GET_TILE_INFO',
-                    'data': {
-                        'x': tile_rect.x,
-                        'y': tile_rect.y,
+                if tile_rect:
+                    result = {
+                        'action': 'GET_TILE_INFO',
+                        'data': {
+                            'x': tile_rect.x,
+                            'y': tile_rect.y,
+                        }
                     }
-                }
-                response = game.net_man.send(bytes(json.dumps(result), encoding='utf-8'))
-                print(response)
+                    response = game.net_man.send(bytes(json.dumps(result), encoding='utf-8'))
+                    print(response)
 
         if running:
             game.action_man.handle_routine()
