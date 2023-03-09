@@ -75,7 +75,6 @@ class Migration(migrations.Migration):
                 ),
                 ("x", models.SmallIntegerField()),
                 ("y", models.SmallIntegerField()),
-                ("tier", models.SmallIntegerField()),
                 (
                     "template",
                     models.ForeignKey(
