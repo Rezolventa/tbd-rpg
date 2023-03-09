@@ -3,6 +3,7 @@ import socket
 from _thread import start_new_thread
 from datetime import datetime
 
+from django.core.exceptions import ObjectDoesNotExist
 from django.forms import model_to_dict
 
 from const import SERVER_ADDRESS, TILE_SIDE_PX
@@ -60,8 +61,11 @@ class API:
             connection.send(str.encode(time_count))
 
     def send_tile_info(self, connection, data: dict):
+        response = {}
         tile_info = self.data_manager.get_tile_info(data)
-        connection.send(bytes(json.dumps(model_to_dict(tile_info)), encoding='utf-8'))
+        if tile_info is not None:
+            response = model_to_dict(tile_info)
+        connection.send(bytes(json.dumps(response), encoding='utf-8'))
 
     def get_time_count(self):
         return str(int((datetime.now() - self.server_started_at).total_seconds()))
@@ -77,9 +81,9 @@ class DataManager:
             x = data.get('x') / TILE_SIDE_PX
             y = data.get('y') / TILE_SIDE_PX
             tile_geo = TileGeo.objects.get(x=x, y=y)
-        except KeyError:
+        except ObjectDoesNotExist:
             print('KeyError > x: {}, y: {}'.format(data.get('x'), data.get('y')))
-            return
+            return None
         return tile_geo.template
 
 

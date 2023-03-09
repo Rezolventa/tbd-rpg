@@ -26,7 +26,7 @@ def get_scaled_image(image, k):
 
 class ScreenManager:
     """Менеджер объектов на экране клиента."""
-    group_list = ['map', 'hover', 'focus', 'player', 'actions']
+    group_list = ['map', 'player', 'actions', 'hover', 'focus']
 
     tile_mapping = {
         'M': 'mountain_tile',
@@ -73,6 +73,8 @@ class ScreenManager:
         # action_frame
         action_frame = UIPanel(self.get_group('actions'), 576, 448, self.sprite_store['action_frame'])
         action_frame.add_button(self.sprite_store['move_icon'])
+
+        self.icons = [self.sprite_store['move_icon']]
 
         # player
         player = self.sprite_store['player']
@@ -144,6 +146,7 @@ class ScreenManager:
             tiles.append(row)
         return tiles
 
+    # TODO: вообще говоря, не используется в этом классе
     def get_tiles_as_list(self):
         """Представляет тайлы в виде списка."""
         tiles_as_list = []
