@@ -29,16 +29,16 @@ class ActionManager:
         self.handle_mouse_hover()
 
     def handle_mouse_hover(self):
-        self.game_controller.screen_man.hover_group.remove(self.game_controller.screen_man.hover_image)
+        self.game_controller.screen_man.get_group('hover').remove(self.game_controller.screen_man.hover_image)
         for tile in self.tiles:
             if tile.rect.collidepoint(pygame.mouse.get_pos()):
                 self.hover_image.rect = tile.rect
-                self.game_controller.screen_man.hover_group.add(self.hover_image)
+                self.game_controller.screen_man.get_group('hover').add(self.hover_image)
 
     def handle_mouse_click(self):
-        self.game_controller.screen_man.focus_group.remove(self.game_controller.screen_man.focus_image)
+        self.game_controller.screen_man.get_group('focus').remove(self.game_controller.screen_man.focus_image)
         for tile in self.tiles:
             if tile.rect.collidepoint(pygame.mouse.get_pos()):
                 self.focus_image.rect = tile.rect
-                self.game_controller.screen_man.focus_group.add(self.focus_image)
+                self.game_controller.screen_man.get_group('focus').add(self.focus_image)
                 return tile.rect

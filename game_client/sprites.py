@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 import pygame
 
 from const import TILE_SIDE_PX
@@ -5,83 +7,127 @@ from const import TILE_SIDE_PX
 WHITE = (255, 255, 255)
 
 
-class SpriteFactory:
+def get_scaled_image(image, k):
+    """
+    Подгружает спрайт и увеличивает его размер в k раз.
+    Сейчас это функция-хелпер, но чуть позже станет понятно, в какой класс её отнести.
+    """
+    image = pygame.image.load(image)
+
+    if image.get_alpha():
+        image = image.convert_alpha()
+    else:
+        image = image.convert()
+        image.set_colorkey(WHITE)
+
+    size = image.get_size()
+    return pygame.transform.scale(image, (int(size[0] * k), int(size[1] * k)))
+
+
+class ScreenManager:
+    """Менеджер объектов на экране клиента."""
+    group_list = ['map', 'hover', 'focus', 'player', 'actions']
+
+    tile_mapping = {
+        'M': 'mountain_tile',
+        'F': 'forest_tile',
+        'S': 'swamp_tile',
+    }
+
+    # TODO: should be received from server
+    map_scheme = [
+        'MSFXXXXXXXXXXXXX',
+        'SSFXXXXXXXXXXXXX',
+        'MSMXXXXXXXXXXXXX',
+        'FFFXXXXXXXXXXXXX',
+        'XXXXXXXXXXXXXXXX',
+        'XXXXXXXXXXXXXXXX',
+        'XXXXXXXXXXXXXXXX',
+        'XXXXXXXXXXXXXXXX',
+        'XXXXXXXXXXXXXXXX',
+        'XXXXXXXXXXXXXXXX',
+        'XXXXXXXXXXXXXXXX',
+        'XXXXXXXXXXXXXXXX',
+        'XXXXXXXXXXXXXXXX',
+        'XXXXXXXXXXXXXXXX',
+        'XXXXXXXXXXXXXXXX',
+        'XXXXXXXXXXXXXXXX',
+    ]
+
+    def __init__(self):
+        self.window = pygame.display.set_mode((31 * TILE_SIDE_PX, 18 * TILE_SIDE_PX))
+
+        self.sprite_groups = self.init_groups()
+        self.sprite_store = self.init_sprites()
+
+        # map_frame
+        map_frame = self.sprite_store['map_frame']
+        map_frame.move_to(32, 32, self.get_group('map'))
+
+        self.tiles = self.init_map()
+
+        # info_frame
+        info_frame = self.sprite_store['info_frame']
+        info_frame.move_to(576, 32, self.get_group('map'))
+
+        # action_frame
+        action_frame = UIPanel(self.get_group('actions'), 576, 448, self.sprite_store['action_frame'])
+        action_frame.add_button(self.sprite_store['move_icon'])
+
+        # player
+        player = self.sprite_store['player']
+        player.move_to(32, 32, self.get_group('player'))
+
+        self.hover_image = self.sprite_store['hover_image']
+        self.focus_image = self.sprite_store['focus_image']
+
+        pygame.display.set_caption('Client')
+
+    def init_groups(self):
+        """Инициализирует все спрайт-группы."""
+        groups = OrderedDict()
+
+        for group_name in self.group_list:
+            groups[group_name] = pygame.sprite.Group()
+
+        return groups
+
+    def get_group(self, name):
+        """Получает спрайт-группу по имени."""
+        return self.sprite_groups.get(name)
+
+    # TODO: Требует регламентации названия спрайтов
+    def get_sprite(self, sprite_type, sprite_name):
+        """Упрощает обращение к спрайтам."""
+        key = '{}_{}'.format(sprite_name, sprite_type)
+        return self.sprite_store[key]
+
     @staticmethod
-    def get_scaled_image(image, k):
-        image = pygame.image.load(image)
-
-        if image.get_alpha():
-            image = image.convert_alpha()
-        else:
-            image = image.convert()
-            image.set_colorkey(WHITE)
-
-        size = image.get_size()
-        return pygame.transform.scale(image, (int(size[0] * k), int(size[1] * k)))
-
-    def create(self, image, x, y):
-        return CommonSprite(self.group, image, x, y)
-
-
-class UIFactory(SpriteFactory):
-    """Отвечает за иниицализацию спрайтов UI."""
-
-    def run(self, map_group, player_group, hover_group, focus_group, icons_group):
+    def init_sprites():
+        """Инициализирует основные спрайты UI."""
         # Фреймы - окна интерфейса
-        map_frame = CommonSprite(map_group, pygame.image.load('img/map_frame.jpg'), 32, 32)
-        info_frame = CommonSprite(map_group, pygame.image.load('img/info_frame.jpg'), 576, 32)
-        action_frame = CommonSprite(map_group, pygame.image.load('img/action_frame.jpg'), 576, 448)
-        player = PlayerFactory(32, 32).run(player_group)
+        map_frame = CommonSprite('img/map_frame.jpg')
+        info_frame = CommonSprite('img/info_frame.jpg')
+        action_frame = CommonSprite('img/action_frame.jpg')
+        player = CommonSprite('img/player.png', 2)
 
         # Элементы UI
-        hover_image = CommonSprite(
-            hover_group, self.get_scaled_image('img/tile_focus.png', 2), 16, 16, 'hover_image'
-        )
-        hover_group.remove(hover_image)
-        focus_image = CommonSprite(
-            focus_group, self.get_scaled_image('img/tile_focus.png', 2), 16, 16, 'focus_image'
-        )
-        focus_group.remove(focus_image)
+        hover_image = CommonSprite('img/tile_focus.png', 2)
+        focus_image = CommonSprite('img/tile_focus.png', 2)
+        move_icon = CommonSprite('img/icon_move.jpg', 2)
 
-        icon_move_image = CommonSprite(hover_group, self.get_scaled_image('img/icon_move.jpg', 2), 576, 448)
-
-        result = {
+        return {
             'map_frame': map_frame,
-            'player': player,
             'info_frame': info_frame,
             'action_frame': action_frame,
+            'player': player,
             'hover_image': hover_image,
             'focus_image': focus_image,
-            'icon_move_image': icon_move_image,
-        }
-        return result
-
-
-class PlayerFactory(SpriteFactory):
-    """Отвечает за иниицализацию спрайтов игрока."""
-
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-
-    def run(self, group):
-        return CommonSprite(group, self.get_scaled_image('img/player.png', 2), self.x, self.y)
-
-
-class MapTilesFactory(SpriteFactory):
-    """Отвечает за иниицализацию спрайтов основной карты."""
-
-    def __init__(self, map_scheme, map_frame, group):
-        self.map_scheme = map_scheme
-        self.map_frame = map_frame
-        self.group = group
-        self.tile_mapping = {
-            'M': 'mountain_tile',
-            'F': 'forest_tile',
-            'S': 'swamp_tile',
+            'move_icon': move_icon,
         }
 
-    def run(self):
+    def init_map(self):
+        """Подгружает и располагает спрайты тайлов на карте."""
         tiles = []
         for i in range(16):
             row = []
@@ -89,92 +135,84 @@ class MapTilesFactory(SpriteFactory):
                 tile_symbol = self.map_scheme[i][j]
                 if tile_symbol == 'X':
                     continue
-                x = self.map_frame.x + j * TILE_SIDE_PX
-                y = self.map_frame.x + i * TILE_SIDE_PX
-                image = self.get_scaled_image('img/{}.jpg'.format(self.tile_mapping[tile_symbol]), 2)
-                sprite = self.create(image, x, y)
+                x = self.sprite_store['map_frame'].rect.x + j * TILE_SIDE_PX
+                y = self.sprite_store['map_frame'].rect.x + i * TILE_SIDE_PX
+                sprite = CommonSprite('img/{}.jpg'.format(self.tile_mapping[tile_symbol]), 2)
+                sprite.move_to(x, y)
+                self.sprite_groups['map'].add(sprite)
                 row.append(sprite)
             tiles.append(row)
         return tiles
 
-
-class ScreenManager:
-    """Менеджер объектов на экране клиента."""
-
-    def __init__(self):
-        self.window = pygame.display.set_mode((31 * TILE_SIDE_PX, 18 * TILE_SIDE_PX))
-
-        self.ui_group = pygame.sprite.Group()
-        self.map_group = pygame.sprite.Group()
-        self.hover_group = pygame.sprite.GroupSingle()
-        self.focus_group = pygame.sprite.GroupSingle()
-        self.player_group = pygame.sprite.GroupSingle()
-        self.icons_group = pygame.sprite.GroupSingle()
-
-        pygame.display.set_caption('Client')
-
-        ui = UIFactory().run(self.map_group, self.player_group, self.hover_group, self.focus_group, self.icons_group)
-
-        map_frame = ui['map_frame']
-
-        # TODO: should be received from server
-        self.map_scheme = [
-            'MSFXXXXXXXXXXXXX',
-            'SSFXXXXXXXXXXXXX',
-            'MSMXXXXXXXXXXXXX',
-            'FFFXXXXXXXXXXXXX',
-            'XXXXXXXXXXXXXXXX',
-            'XXXXXXXXXXXXXXXX',
-            'XXXXXXXXXXXXXXXX',
-            'XXXXXXXXXXXXXXXX',
-            'XXXXXXXXXXXXXXXX',
-            'XXXXXXXXXXXXXXXX',
-            'XXXXXXXXXXXXXXXX',
-            'XXXXXXXXXXXXXXXX',
-            'XXXXXXXXXXXXXXXX',
-            'XXXXXXXXXXXXXXXX',
-            'XXXXXXXXXXXXXXXX',
-            'XXXXXXXXXXXXXXXX',
-        ]
-
-        self.tiles = MapTilesFactory(self.map_scheme, map_frame, self.map_group).run()
-        self.hover_image = ui['hover_image']
-        self.focus_image = ui['focus_image']
-
     def get_tiles_as_list(self):
-        tiles = []
+        """Представляет тайлы в виде списка."""
+        tiles_as_list = []
         for row in self.tiles:
-            tiles += [tile for tile in row]
-        return tiles
+            tiles_as_list += [tile for tile in row]
+        return tiles_as_list
 
     def redraw(self):
-        """Определяет порядок отображения слоёв (групп) на экране."""
-        self.ui_group.update()
-        self.ui_group.draw(self.window)
-        self.map_group.update()
-        self.map_group.draw(self.window)
-        self.hover_group.update()
-        self.hover_group.draw(self.window)
-        self.focus_group.update()
-        self.focus_group.draw(self.window)
-        self.player_group.update()
-        self.player_group.draw(self.window)
-        self.icons_group.update()
-        self.icons_group.draw(self.window)
+        """
+        Отрисовывает спрайт-группы в установленном в self.sprite_groups порядке.
+        Вызывается каждый такт.
+        """
+        for name, group in self.sprite_groups.items():
+            group.update()
+            group.draw(self.window)
 
 
 class CommonSprite(pygame.sprite.Sprite):
     """Модифицированный Sprite, класс-прототип для всех спрайтов."""
 
-    def __init__(self, group, image, x, y, name=None):
-        super().__init__(group)
+    def __init__(self, image, scaling=None):
+        super().__init__()
+        self.image = self.get_scaled_image(image, scaling) if scaling else pygame.image.load(image)
+        self.rect = self.image.get_rect()
+
+    def get_scaled_image(self, image, k):
+        return get_scaled_image(image, k)
+
+    def move_to(self, x, y, group=None):
+        self.rect.topleft = (x, y)
+
+        if group is not None:
+            group.add(self)
+
+
+class UIPanel:
+    """
+    Прототип для элемента интерфейса Панель.
+    Автоматически располагает одинаковые прямоугольные кнопки.
+    Если покажет себя хорошо, по его примеру сделаем остальные элементы UI.
+    """
+    def __init__(self, sprite_group, x, y, background_sprite):
+        self.sprite_group = sprite_group
         self.x = x
         self.y = y
-        self.image = image
-        self.rect = self.image.get_rect()
-        self.rect.topleft = (self.x, self.y)
-        self.name = name
-        # self.focus_on = False
+        self.button_width = TILE_SIDE_PX
+        self.button_height = TILE_SIDE_PX
+        self.spacing = TILE_SIDE_PX / 2
+        self.buttons = []
+
+        # Состояния
+        self.active = False
+
+        background_sprite.move_to(576, 448, self.sprite_group)
+
+    def add_button(self, button: CommonSprite):
+        """Определят место для новой кнопки, добавляет её спрайт в группу."""
+        button_x = self.x + self.spacing + self.button_width * len(self.buttons)
+        button_y = self.y + self.spacing
+        button.move_to(button_x, button_y, self.sprite_group)
+        self.buttons.append(button)
+
+    def show(self):
+        """Включает отображение элемента интерфейса."""
+        self.active = True
+
+    def hide(self):
+        """Выключает отображение элемента интерфейса."""
+        self.active = False
 
 
 # class Textbox(pygame.sprite.Sprite):
