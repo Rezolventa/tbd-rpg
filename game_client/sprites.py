@@ -26,6 +26,7 @@ def get_scaled_image(image, k):
 
 class ScreenManager:
     """Менеджер объектов на экране клиента."""
+
     group_list = ['map', 'player', 'actions', 'hover', 'focus']
 
     tile_mapping = {
@@ -117,6 +118,7 @@ class ScreenManager:
         hover_image = CommonSprite('img/tile_focus.png', 2)
         focus_image = CommonSprite('img/tile_focus.png', 2)
         move_icon = CommonSprite('img/icon_move.jpg', 2)
+        move_icon_hover = CommonSprite('img/icon_move_hover.jpg', 2)
 
         return {
             'map_frame': map_frame,
@@ -126,6 +128,7 @@ class ScreenManager:
             'hover_image': hover_image,
             'focus_image': focus_image,
             'move_icon': move_icon,
+            'move_icon_hover': move_icon_hover,
         }
 
     def init_map(self):
@@ -188,6 +191,7 @@ class UIPanel:
     Автоматически располагает одинаковые прямоугольные кнопки.
     Если покажет себя хорошо, по его примеру сделаем остальные элементы UI.
     """
+
     def __init__(self, sprite_group, x, y, background_sprite):
         self.sprite_group = sprite_group
         self.x = x

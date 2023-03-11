@@ -4,3 +4,5 @@
 горы - мало лута, но есть руда
 лес - сбалансировано
 оазис в пустыне
+
+black apps --line-length=120 -S --exclude=migrations

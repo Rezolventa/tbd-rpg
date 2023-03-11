@@ -96,17 +96,27 @@ def main():
         print('Connected to:', ip)
 
         if not Player.objects.all().exists():
-            tts1 = TileTemplate.objects.create(type=TileTemplate.TileTypes.SWAMP, tier=1, loot_spots=2, hidden_loot_spots=1)
+            tts1 = TileTemplate.objects.create(
+                type=TileTemplate.TileTypes.SWAMP, tier=1, loot_spots=2, hidden_loot_spots=1
+            )
             TileTemplate.objects.create(type=TileTemplate.TileTypes.SWAMP, tier=2, loot_spots=1, hidden_loot_spots=2)
             TileTemplate.objects.create(type=TileTemplate.TileTypes.SWAMP, tier=3, loot_spots=4, hidden_loot_spots=2)
 
-            ttf1 = TileTemplate.objects.create(type=TileTemplate.TileTypes.FOREST, tier=1, loot_spots=2, hidden_loot_spots=0)
+            ttf1 = TileTemplate.objects.create(
+                type=TileTemplate.TileTypes.FOREST, tier=1, loot_spots=2, hidden_loot_spots=0
+            )
             TileTemplate.objects.create(type=TileTemplate.TileTypes.FOREST, tier=2, loot_spots=2, hidden_loot_spots=1)
             TileTemplate.objects.create(type=TileTemplate.TileTypes.FOREST, tier=3, loot_spots=4, hidden_loot_spots=2)
 
-            ttm7 = TileTemplate.objects.create(type=TileTemplate.TileTypes.MOUNTAINS, tier=1, loot_spots=1, hidden_loot_spots=0)
-            TileTemplate.objects.create(type=TileTemplate.TileTypes.MOUNTAINS, tier=2, loot_spots=1, hidden_loot_spots=1)
-            TileTemplate.objects.create(type=TileTemplate.TileTypes.MOUNTAINS, tier=3, loot_spots=2, hidden_loot_spots=2)
+            ttm7 = TileTemplate.objects.create(
+                type=TileTemplate.TileTypes.MOUNTAINS, tier=1, loot_spots=1, hidden_loot_spots=0
+            )
+            TileTemplate.objects.create(
+                type=TileTemplate.TileTypes.MOUNTAINS, tier=2, loot_spots=1, hidden_loot_spots=1
+            )
+            TileTemplate.objects.create(
+                type=TileTemplate.TileTypes.MOUNTAINS, tier=3, loot_spots=2, hidden_loot_spots=2
+            )
 
             TileGeo.objects.create(x=1, y=1, template=ttm7)
             TileGeo.objects.create(x=2, y=1, template=tts1)

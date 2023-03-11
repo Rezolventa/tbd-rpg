@@ -54,11 +54,18 @@ class ActionManager:
     def handle_mouse_click(self):
         """Обрабатывает событие left mouse click."""
         self.get_group('focus').remove(self.focus_image)
-        tile, obj_type = self.get_hovered_object()
-        if tile:
-            self.focus_image.rect = tile.rect
+        obj, obj_type = self.get_hovered_object()
+        if obj_type == 'tile':
+            self.focus_image.rect = obj.rect
             self.get_group('focus').add(self.focus_image)
-            return tile.rect
+            return obj.rect
+
+        if obj_type == 'icon':
+            image = self.game_controller.screen_man.sprite_store['move_icon_hover']
+            image.rect = obj.rect
+            self.get_group('focus').add(image)
+            return obj.rect
 
     def get_group(self, group_name):
+        """Возвращает спрайт-группу."""
         return self.game_controller.screen_man.get_group(group_name)

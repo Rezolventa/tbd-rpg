@@ -32,7 +32,7 @@ def main():
                         'data': {
                             'x': tile_rect.x,
                             'y': tile_rect.y,
-                        }
+                        },
                     }
                     response = game.net_man.send(bytes(json.dumps(result), encoding='utf-8'))
                     print(response)
