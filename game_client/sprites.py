@@ -115,8 +115,8 @@ class ScreenManager:
         player = CommonSprite('img/player.png', 2)
 
         # Элементы UI
-        hover_image = CommonSprite('img/tile_focus.png', 2)
-        focus_image = CommonSprite('img/tile_focus.png', 2)
+        hover_image = CommonSprite('img/tile_focus.png', 1)
+        focus_image = CommonSprite('img/tile_focus.png')
         move_icon = CommonSprite('img/icon_move.jpg', 2)
         move_icon_hover = CommonSprite('img/icon_move_hover.jpg', 2)
 
