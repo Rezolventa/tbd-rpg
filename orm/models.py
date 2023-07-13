@@ -4,6 +4,8 @@ from django.db import models
 class Player(models.Model):
     name = models.CharField(max_length=32)
     stamina = models.SmallIntegerField()
+    x = models.SmallIntegerField(default=0)
+    y = models.SmallIntegerField(default=0)
 
     class Meta:
         db_table = 'player'

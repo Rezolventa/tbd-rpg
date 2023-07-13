@@ -7,10 +7,9 @@ from game_client.controllers import GameController
 pygame.init()
 pygame.font.init()
 
-game = GameController()
-
 
 def main():
+    game = GameController()
     clock = pygame.time.Clock()
 
     running = True
@@ -24,18 +23,33 @@ def main():
                 break
             elif event.type == pygame.MOUSEBUTTONUP:
                 # - LEFT CLICK
-                tile_rect = game.action_man.handle_mouse_click()
+                obj = game.action_man.handle_mouse_click()
 
-                if tile_rect:
-                    result = {
-                        'action': 'GET_TILE_INFO',
-                        'data': {
-                            'x': tile_rect.x,
-                            'y': tile_rect.y,
-                        },
-                    }
-                    response = game.net_man.send(bytes(json.dumps(result), encoding='utf-8'))
-                    print(response)
+                if game.action_man.state == 'idle':
+                    if obj:
+                        tile_rect = obj.rect
+                        result = {
+                            'action': 'GET_TILE_INFO',
+                            'data': {
+                                'x': tile_rect.x,
+                                'y': tile_rect.y,
+                            },
+                        }
+                        response = game.net_man.send(bytes(json.dumps(result), encoding='utf-8'))
+                        print(response)
+                elif game.action_man.state == 'choose_tile_to_move':
+                    if obj:
+                        tile_rect = obj.rect
+                        result = {
+                            'action': 'MOVE_PLAYER',
+                            'data': {
+                                'x': tile_rect.x,
+                                'y': tile_rect.y,
+                            },
+                        }
+                        response = json.loads(game.net_man.send(bytes(json.dumps(result), encoding='utf-8')))
+                        print(response)
+                        game.screen_man.sprites['player_image'].move_to(response['x'], response['y'])
 
         if running:
             game.action_man.handle_routine()

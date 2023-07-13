@@ -1,27 +1,12 @@
+from datetime import datetime
 from collections import OrderedDict
 
 import pygame
 
 from const import TILE_SIDE_PX
 
+
 WHITE = (255, 255, 255)
-
-
-def get_scaled_image(image, k):
-    """
-    Подгружает спрайт и увеличивает его размер в k раз.
-    Сейчас это функция-хелпер, но чуть позже станет понятно, в какой класс её отнести.
-    """
-    image = pygame.image.load(image)
-
-    if image.get_alpha():
-        image = image.convert_alpha()
-    else:
-        image = image.convert()
-        image.set_colorkey(WHITE)
-
-    size = image.get_size()
-    return pygame.transform.scale(image, (int(size[0] * k), int(size[1] * k)))
 
 
 class ScreenManager:
@@ -57,34 +42,53 @@ class ScreenManager:
 
     def __init__(self):
         self.window = pygame.display.set_mode((31 * TILE_SIDE_PX, 18 * TILE_SIDE_PX))
-
+        self.sprites = self.init_sprites()
         self.sprite_groups = self.init_groups()
-        self.sprite_store = self.init_sprites()
 
         # map_frame
-        map_frame = self.sprite_store['map_frame']
+        map_frame = self.sprites['map_frame']
         map_frame.move_to(32, 32, self.get_group('map'))
 
         self.tiles = self.init_map()
 
         # info_frame
-        info_frame = self.sprite_store['info_frame']
+        info_frame = self.sprites['info_frame']
         info_frame.move_to(576, 32, self.get_group('map'))
 
         # action_frame
-        action_frame = UIPanel(self.get_group('actions'), 576, 448, self.sprite_store['action_frame'])
-        action_frame.add_button(self.sprite_store['move_icon'])
+        action_frame = UIPanel(self.get_group('actions'), 576, 448, self.sprites['action_frame'])
+        action_frame.add_button(self.sprites['move_icon'])
 
-        self.icons = [self.sprite_store['move_icon']]
+        self.icons = [self.sprites['move_icon']]
 
         # player
-        player = self.sprite_store['player']
+        player = self.sprites['player_image']
         player.move_to(32, 32, self.get_group('player'))
 
-        self.hover_image = self.sprite_store['hover_image']
-        self.focus_image = self.sprite_store['focus_image']
+        self.hover_image = self.sprites['hover_image']
+        self.focus_image = self.sprites['focus_image']
 
         pygame.display.set_caption('Client')
+
+    @staticmethod
+    def init_sprites():
+        sprite_dict = dict()
+
+        # Фреймы
+        sprite_dict['map_frame'] = CommonSprite('img/map_frame.jpg')
+        sprite_dict['info_frame'] = CommonSprite('img/info_frame.jpg')
+        sprite_dict['action_frame'] = CommonSprite('img/action_frame.jpg')
+        sprite_dict['player_image'] = CommonSprite('img/player.png', 2)
+
+        sprite_dict['tile_move'] = CommonSprite('img/tile_move.png')
+
+        # Элементы UI
+        sprite_dict['hover_image'] = CommonSprite('img/tile_focus.png')
+        sprite_dict['focus_image'] = CommonSprite('img/tile_focus.png')
+        sprite_dict['move_icon'] = CommonSprite('img/icon_move.jpg', 2)
+        sprite_dict['move_icon_hover'] = CommonSprite('img/icon_move_hover.jpg', 2)
+
+        return sprite_dict
 
     def init_groups(self):
         """Инициализирует все спрайт-группы."""
@@ -103,33 +107,7 @@ class ScreenManager:
     def get_sprite(self, sprite_type, sprite_name):
         """Упрощает обращение к спрайтам."""
         key = '{}_{}'.format(sprite_name, sprite_type)
-        return self.sprite_store[key]
-
-    @staticmethod
-    def init_sprites():
-        """Инициализирует основные спрайты UI."""
-        # Фреймы - окна интерфейса
-        map_frame = CommonSprite('img/map_frame.jpg')
-        info_frame = CommonSprite('img/info_frame.jpg')
-        action_frame = CommonSprite('img/action_frame.jpg')
-        player = CommonSprite('img/player.png', 2)
-
-        # Элементы UI
-        hover_image = CommonSprite('img/tile_focus.png', 1)
-        focus_image = CommonSprite('img/tile_focus.png')
-        move_icon = CommonSprite('img/icon_move.jpg', 2)
-        move_icon_hover = CommonSprite('img/icon_move_hover.jpg', 2)
-
-        return {
-            'map_frame': map_frame,
-            'info_frame': info_frame,
-            'action_frame': action_frame,
-            'player': player,
-            'hover_image': hover_image,
-            'focus_image': focus_image,
-            'move_icon': move_icon,
-            'move_icon_hover': move_icon_hover,
-        }
+        # return self.sprite_store[key]
 
     def init_map(self):
         """Подгружает и располагает спрайты тайлов на карте."""
@@ -140,8 +118,8 @@ class ScreenManager:
                 tile_symbol = self.map_scheme[i][j]
                 if tile_symbol == 'X':
                     continue
-                x = self.sprite_store['map_frame'].rect.x + j * TILE_SIDE_PX
-                y = self.sprite_store['map_frame'].rect.x + i * TILE_SIDE_PX
+                x = self.sprites['map_frame'].rect.x + j * TILE_SIDE_PX
+                y = self.sprites['map_frame'].rect.x + i * TILE_SIDE_PX
                 sprite = CommonSprite('img/{}.jpg'.format(self.tile_mapping[tile_symbol]), 2)
                 sprite.move_to(x, y)
                 self.sprite_groups['map'].add(sprite)
@@ -159,7 +137,7 @@ class ScreenManager:
 
     def redraw(self):
         """
-        Отрисовывает спрайт-группы в установленном в self.sprite_groups порядке.
+        Рисует спрайт-группы в установленном в self.sprite_groups порядке.
         Вызывается каждый такт.
         """
         for name, group in self.sprite_groups.items():
@@ -175,8 +153,21 @@ class CommonSprite(pygame.sprite.Sprite):
         self.image = self.get_scaled_image(image, scaling) if scaling else pygame.image.load(image)
         self.rect = self.image.get_rect()
 
-    def get_scaled_image(self, image, k):
-        return get_scaled_image(image, k)
+    @staticmethod
+    def get_scaled_image(image, k):
+        """
+        Подгружает спрайт и увеличивает его размер в k раз.
+        """
+        image = pygame.image.load(image)
+
+        if image.get_alpha():
+            image = image.convert_alpha()
+        else:
+            image = image.convert()
+            image.set_colorkey(WHITE)
+
+        size = image.get_size()
+        return pygame.transform.scale(image, (int(size[0] * k), int(size[1] * k)))
 
     def move_to(self, x, y, group=None):
         self.rect.topleft = (x, y)
@@ -220,18 +211,3 @@ class UIPanel:
     def hide(self):
         """Выключает отображение элемента интерфейса."""
         self.active = False
-
-
-# class Textbox(pygame.sprite.Sprite):
-#     font = pygame.font.SysFont('serif', 18)
-#
-#     def __init__(self, text):
-#         super().__init__()
-#         self.text = text
-#         self.image = self.font.render(text, False, (0, 255, 0))
-#         self.rect = self.image.get_rect()
-#         self.pos_x = 30
-#         self.pos_y = 30
-#
-#     def draw(self, win):
-#         win.blit(self.image, (self.pos_x, self.pos_y))

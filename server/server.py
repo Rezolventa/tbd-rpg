@@ -53,11 +53,16 @@ class API:
         if data:
             data = json.loads(data)
             action = data.get('action')
+
             if action == 'GET_TILE_INFO':
                 self.send_tile_info(connection, data.get('data'))
+            elif action == 'GET_PLAYER_INFO':
+                self.send_player_info(connection)
+            elif action == 'MOVE_PLAYER':
+                self.move_player(connection, data.get('data'))
         else:
             time_count = self.get_time_count()
-            print('Server time:', time_count)
+            print('Unknown Command:', time_count)
             connection.send(str.encode(time_count))
 
     def send_tile_info(self, connection, data: dict):
@@ -66,6 +71,37 @@ class API:
         if tile_info is not None:
             response = model_to_dict(tile_info)
         connection.send(bytes(json.dumps(response), encoding='utf-8'))
+
+    @staticmethod
+    def send_player_info(connection):
+        player = Player.objects.first()
+        response = model_to_dict(player)
+        connection.send(bytes(json.dumps(response), encoding='utf-8'))
+
+    # TODO: не место здесь, разделить на две функции
+    def move_player(self, connection, data):
+        # direction = data.get('direction')
+        player = Player.objects.first()
+
+        # direction_coords_mask = {
+        #     'left': (-1, 0),
+        #     'right': (1, 0),
+        #     'up': (0, -1),
+        #     'down': (0, 1),
+        # }
+        #
+        # new_x = player.x + direction_coords_mask.get(direction)[0]
+        # new_y = player.y + direction_coords_mask.get(direction)[1]
+
+        new_x = data.get('x')
+        new_y = data.get('y')
+
+        # TODO: validation of new coords
+        player.x = new_x
+        player.y = new_y
+        player.save()
+
+        self.send_player_info(connection)
 
     def get_time_count(self):
         return str(int((datetime.now() - self.server_started_at).total_seconds()))

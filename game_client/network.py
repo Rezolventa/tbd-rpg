@@ -9,7 +9,7 @@ class NetworkManager:
         self.address = SERVER_ADDRESS
 
         self.client.connect(self.address)
-        self.client.recv(2048).decode()
+        self.client.recv(2048).decode()  # data for start: player_info
 
     def send(self, data):
         try:
