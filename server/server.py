@@ -123,6 +123,48 @@ class DataManager:
         return tile_geo.template
 
 
+def init_db():
+    tts1 = TileTemplate.objects.create(
+        type=TileTemplate.TileTypes.SWAMP, tier=1, loot_spots=2, hidden_loot_spots=1
+    )
+    TileTemplate.objects.create(type=TileTemplate.TileTypes.SWAMP, tier=2, loot_spots=1, hidden_loot_spots=2)
+    TileTemplate.objects.create(type=TileTemplate.TileTypes.SWAMP, tier=3, loot_spots=4, hidden_loot_spots=2)
+
+    ttf1 = TileTemplate.objects.create(
+        type=TileTemplate.TileTypes.FOREST, tier=1, loot_spots=2, hidden_loot_spots=0
+    )
+    TileTemplate.objects.create(type=TileTemplate.TileTypes.FOREST, tier=2, loot_spots=2, hidden_loot_spots=1)
+    TileTemplate.objects.create(type=TileTemplate.TileTypes.FOREST, tier=3, loot_spots=4, hidden_loot_spots=2)
+
+    ttm7 = TileTemplate.objects.create(
+        type=TileTemplate.TileTypes.MOUNTAINS, tier=1, loot_spots=1, hidden_loot_spots=0
+    )
+    TileTemplate.objects.create(
+        type=TileTemplate.TileTypes.MOUNTAINS, tier=2, loot_spots=1, hidden_loot_spots=1
+    )
+    TileTemplate.objects.create(
+        type=TileTemplate.TileTypes.MOUNTAINS, tier=3, loot_spots=2, hidden_loot_spots=2
+    )
+
+    TileGeo.objects.create(x=1, y=1, template=ttm7)
+    TileGeo.objects.create(x=2, y=1, template=tts1)
+    TileGeo.objects.create(x=3, y=1, template=ttf1)
+
+    TileGeo.objects.create(x=1, y=2, template=tts1)
+    TileGeo.objects.create(x=2, y=2, template=tts1)
+    TileGeo.objects.create(x=3, y=2, template=ttf1)
+
+    TileGeo.objects.create(x=1, y=3, template=ttm7)
+    TileGeo.objects.create(x=2, y=3, template=tts1)
+    TileGeo.objects.create(x=3, y=3, template=ttm7)
+
+    TileGeo.objects.create(x=1, y=4, template=ttf1)
+    TileGeo.objects.create(x=2, y=4, template=ttf1)
+    TileGeo.objects.create(x=3, y=4, template=ttf1)
+
+    Player.objects.create(name='Test', stamina=100)
+
+
 def main():
     session_id = 0
     server = Server()
@@ -132,45 +174,7 @@ def main():
         print('Connected to:', ip)
 
         if not Player.objects.all().exists():
-            tts1 = TileTemplate.objects.create(
-                type=TileTemplate.TileTypes.SWAMP, tier=1, loot_spots=2, hidden_loot_spots=1
-            )
-            TileTemplate.objects.create(type=TileTemplate.TileTypes.SWAMP, tier=2, loot_spots=1, hidden_loot_spots=2)
-            TileTemplate.objects.create(type=TileTemplate.TileTypes.SWAMP, tier=3, loot_spots=4, hidden_loot_spots=2)
-
-            ttf1 = TileTemplate.objects.create(
-                type=TileTemplate.TileTypes.FOREST, tier=1, loot_spots=2, hidden_loot_spots=0
-            )
-            TileTemplate.objects.create(type=TileTemplate.TileTypes.FOREST, tier=2, loot_spots=2, hidden_loot_spots=1)
-            TileTemplate.objects.create(type=TileTemplate.TileTypes.FOREST, tier=3, loot_spots=4, hidden_loot_spots=2)
-
-            ttm7 = TileTemplate.objects.create(
-                type=TileTemplate.TileTypes.MOUNTAINS, tier=1, loot_spots=1, hidden_loot_spots=0
-            )
-            TileTemplate.objects.create(
-                type=TileTemplate.TileTypes.MOUNTAINS, tier=2, loot_spots=1, hidden_loot_spots=1
-            )
-            TileTemplate.objects.create(
-                type=TileTemplate.TileTypes.MOUNTAINS, tier=3, loot_spots=2, hidden_loot_spots=2
-            )
-
-            TileGeo.objects.create(x=1, y=1, template=ttm7)
-            TileGeo.objects.create(x=2, y=1, template=tts1)
-            TileGeo.objects.create(x=3, y=1, template=ttf1)
-
-            TileGeo.objects.create(x=1, y=2, template=tts1)
-            TileGeo.objects.create(x=2, y=2, template=tts1)
-            TileGeo.objects.create(x=3, y=2, template=ttf1)
-
-            TileGeo.objects.create(x=1, y=3, template=ttm7)
-            TileGeo.objects.create(x=2, y=3, template=tts1)
-            TileGeo.objects.create(x=3, y=3, template=ttm7)
-
-            TileGeo.objects.create(x=1, y=4, template=ttf1)
-            TileGeo.objects.create(x=2, y=4, template=ttf1)
-            TileGeo.objects.create(x=3, y=4, template=ttf1)
-
-            Player.objects.create(name='Test', stamina=100)
+            init_db()
 
         start_new_thread(server.handle_client, (connection, session_id))
         session_id += 1
