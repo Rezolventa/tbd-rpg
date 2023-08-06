@@ -143,6 +143,8 @@ class ScreenManager:
         for name, group in self.sprite_groups.items():
             group.update()
             group.draw(self.window)
+        self.sprite_groups['player'].update()
+        self.sprite_groups['player'].draw(self.window)
 
 
 class CommonSprite(pygame.sprite.Sprite):
@@ -171,6 +173,7 @@ class CommonSprite(pygame.sprite.Sprite):
 
     def move_to(self, x, y, group=None):
         self.rect.topleft = (x, y)
+        # print('Moved player to: {}, {}'.format(x, y))
 
         if group is not None:
             group.add(self)

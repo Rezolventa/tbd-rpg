@@ -1,3 +1,5 @@
+import json
+
 import pygame
 
 from const import TILE_SIDE_PX
@@ -26,7 +28,7 @@ class ActionManager:
         return None, None
 
     def handle_routine(self):
-        """Обрабатывает регулярные события."""
+        """Обрабатывает ежефреймные события."""
         self.handle_mouse_hover()
 
     def handle_mouse_hover(self):
@@ -41,18 +43,36 @@ class ActionManager:
         """Обрабатывает событие left mouse click."""
         self.get_group('focus').remove(self.sprites['focus_image'])
         obj, obj_type = self.get_hovered_object()
+
         if obj_type == 'tile':
             # Клик на тайл карты
             if self.state == 'idle':
                 self.sprites['focus_image'].rect = obj.rect
                 self.get_group('focus').add(self.sprites['focus_image'])
+                result = {
+                    'action': 'GET_TILE_INFO',
+                    'data': {
+                        'x': obj.rect.x,
+                        'y': obj.rect.y,
+                    },
+                }
+                response = self.game_controller.net_man.send(bytes(json.dumps(result), encoding='utf-8'))
+                # print(response)
             elif self.state == 'choose_tile_to_move':
                 self.sprites['tile_move'].rect = obj.rect
                 self.get_group('focus').add(self.sprites['tile_move'])
-                # TODO: как вариант, через 1.5 секунды исчезает
-            return obj
-
-        if obj_type == 'icon':
+                self.state = 'idle'
+                result = {
+                    'action': 'MOVE_PLAYER',
+                    'data': {
+                        'x': obj.rect.x,
+                        'y': obj.rect.y,
+                    },
+                }
+                response = json.loads(self.game_controller.net_man.send(bytes(json.dumps(result), encoding='utf-8')))
+                # print(response)
+                self.game_controller.screen_man.sprites['player_image'].move_to(response['x'], response['y'])
+        elif obj_type == 'icon':
             hover_image = self.sprites['move_icon_hover']
             # Клик на иконку передвижения
             if self.state == 'idle':
@@ -62,7 +82,8 @@ class ActionManager:
             elif self.state == 'choose_tile_to_move':
                 self.get_group('focus').remove(hover_image)
                 self.state = 'idle'
-            return obj
+        print('New state:', self.state)
+        return obj
 
     def get_group(self, group_name):
         """Возвращает спрайт-группу."""

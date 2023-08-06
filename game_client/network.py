@@ -16,4 +16,4 @@ class NetworkManager:
             self.client.send(data)
             return self.client.recv(2048).decode()
         except socket.error as e:
-            print('ERROR2:', e)
+            print('socket.error:', e)

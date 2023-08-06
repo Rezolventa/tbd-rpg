@@ -1,11 +1,21 @@
-import json
-
 import pygame
 
-from game_client.controllers import GameController
+from game_client.actions import ActionManager
+from game_client.network import NetworkManager
+from game_client.sprites import ScreenManager
 
 pygame.init()
 pygame.font.init()
+
+
+class GameController:
+    """Контроллер, управляющий основными процессами игры."""
+
+    def __init__(self):
+        self.net_man = NetworkManager()
+        self.screen_man = ScreenManager()
+        # self.player = PlayerManager()
+        self.action_man = ActionManager(self)
 
 
 def main():
@@ -22,34 +32,7 @@ def main():
                 pygame.quit()
                 break
             elif event.type == pygame.MOUSEBUTTONUP:
-                # - LEFT CLICK
-                obj = game.action_man.handle_mouse_click()
-
-                if game.action_man.state == 'idle':
-                    if obj:
-                        tile_rect = obj.rect
-                        result = {
-                            'action': 'GET_TILE_INFO',
-                            'data': {
-                                'x': tile_rect.x,
-                                'y': tile_rect.y,
-                            },
-                        }
-                        response = game.net_man.send(bytes(json.dumps(result), encoding='utf-8'))
-                        print(response)
-                elif game.action_man.state == 'choose_tile_to_move':
-                    if obj:
-                        tile_rect = obj.rect
-                        result = {
-                            'action': 'MOVE_PLAYER',
-                            'data': {
-                                'x': tile_rect.x,
-                                'y': tile_rect.y,
-                            },
-                        }
-                        response = json.loads(game.net_man.send(bytes(json.dumps(result), encoding='utf-8')))
-                        print(response)
-                        game.screen_man.sprites['player_image'].move_to(response['x'], response['y'])
+                game.action_man.handle_mouse_click()
 
         if running:
             game.action_man.handle_routine()
